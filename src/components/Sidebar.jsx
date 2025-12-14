@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import {
   MdDashboard,
   MdPeople,
@@ -62,12 +62,22 @@ const MenuItem = ({ to, children, icon: Icon, hasSubMenu, expanded, onToggle }) 
 
 export default function Sidebar() {
   const [expandedMenus, setExpandedMenus] = useState({});
+  const location = useLocation();
+  const activeClass = "bg-blue-50 text-blue-600";
+  const defaultClass = "text-gray-700 hover:bg-gray-50";
+  const baseClass = "flex items-center px-3 py-2 rounded-md transition-colors duration-200 ease-in-out text-sm";
 
   const toggleMenu = (menuName) => {
     setExpandedMenus((prev) => ({
       ...prev,
       [menuName]: !prev[menuName],
     }));
+  };
+
+  const isNoticeBoardActive = () => {
+    return location.pathname.startsWith("/notice-board") || 
+           location.pathname.startsWith("/create-notice") ||
+           location.pathname.startsWith("/edit-notice");
   };
 
   return (
@@ -161,7 +171,15 @@ export default function Sidebar() {
         {/* Document Manager */}
         <MenuItem to="/document-manager" icon={MdFolderOpen}>Document Manager</MenuItem>
 
-        <MenuItem to="/notice-board" icon={MdRssFeed}>Notice Board</MenuItem>
+        <NavLink
+          to="/notice-board"
+          className={() =>
+            `${baseClass} ${isNoticeBoardActive() ? activeClass : defaultClass}`
+          }
+        >
+          <MdRssFeed className="mr-3 text-lg" />
+          Notice Board
+        </NavLink>
         <MenuItem to="/activity-log" icon={MdEventNote}>Activity Log</MenuItem>
         <MenuItem to="/exit-interview" icon={MdExitToApp}>Exit Interview</MenuItem>
         <MenuItem to="/profile" icon={MdPerson}>Profile</MenuItem>

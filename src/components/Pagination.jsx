@@ -1,6 +1,15 @@
+import { FaArrowRight, FaArrowLeft} from "react-icons/fa";
+
 export default function Pagination({ page, pages, setPage }) {
   return (
-    <div className="flex justify-end gap-2 mt-4">
+    <div className="flex justify-end items-center gap-2 mt-4">
+      <button
+        onClick={() => setPage(page - 1)}
+        disabled={page === 1}
+        className="disabled:opacity-50 text-xl"
+      >
+        <FaArrowLeft />
+      </button>
       {[...Array(pages)].map((_, i) => (
         <button
           key={i}
@@ -12,6 +21,13 @@ export default function Pagination({ page, pages, setPage }) {
           {i + 1}
         </button>
       ))}
+      <button
+        onClick={() => setPage(page + 1)}
+        disabled={page === pages}
+        className="disabled:opacity-50 text-xl"
+      >
+        <FaArrowRight />
+      </button>
     </div>
   );
 }

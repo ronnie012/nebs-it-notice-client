@@ -47,6 +47,7 @@ export default function NoticeBoardPage() {
   const [activeNoticesCount, setActiveNoticesCount] = useState(0);
   const [draftNoticesCount, setDraftNoticesCount] = useState(0);
 
+  const [selectedNotices, setSelectedNotices] = useState([]);
 
   const [filters, setFilters] = useState({
     search: "",
@@ -92,7 +93,7 @@ export default function NoticeBoardPage() {
       setActiveNoticesCount(res.pagination.publishedCount);
       setDraftNoticesCount(res.pagination.draftCount);
     } catch (error) {
-      console.error("Failed to fetch notices:", error);
+
       setData([]); // Clear data on error
       setPages(1);
       setActiveNoticesCount(0); // Reset counts on error
@@ -103,12 +104,12 @@ export default function NoticeBoardPage() {
   }
 
   async function toggleStatus(id, current) {
-    const newStatus = current === "published" ? "unpublished" : "published";
+    const newStatus = current === "Published" ? "Unpublished" : "Published";
     
     setData(prevData =>
       prevData.map(item =>
         item._id === id
-          ? { ...item, status: newStatus, publishedAt: newStatus === 'published' ? new Date().toISOString() : null }
+          ? { ...item, status: newStatus, publishedAt: newStatus === 'Published' ? new Date().toISOString() : null }
           : item
       )
     );
@@ -117,7 +118,7 @@ export default function NoticeBoardPage() {
     try {
       await updateStatus(id, newStatus);
     } catch (error) {
-      console.error("Failed to update status:", error);
+
       fetchData();
     }
   }
@@ -129,7 +130,7 @@ export default function NoticeBoardPage() {
       const notice = await getNoticeById(id);
       setSelectedNotice(notice);
     } catch (error) {
-      console.error("Failed to fetch notice details:", error);
+
       setSelectedNotice(null); // Clear selected notice on error
     } finally {
       setModalLoading(false); // Set loading false after fetch
@@ -161,7 +162,7 @@ export default function NoticeBoardPage() {
       setData(prevData => prevData.filter(item => item._id !== id));
       setKebabMenu({ show: false, id: null, position: { x: 0, y: 0 } });
     } catch (error) {
-      console.error("Failed to delete notice:", error);
+
       fetchData();
     }
   }
@@ -171,6 +172,22 @@ export default function NoticeBoardPage() {
     navigate(`/edit-notice/${id}`);
   }
 
+  function handleSelectAll(e) {
+    if (e.target.checked) {
+      const allNoticeIds = data.map(n => n._id);
+      setSelectedNotices(allNoticeIds);
+    } else {
+      setSelectedNotices([]);
+    }
+  }
+
+  function handleSelect(e, id) {
+    if (e.target.checked) {
+      setSelectedNotices([...selectedNotices, id]);
+    } else {
+      setSelectedNotices(selectedNotices.filter(noticeId => noticeId !== id));
+    }
+  }
 
   return (
     <>
@@ -184,6 +201,7 @@ export default function NoticeBoardPage() {
             <MdAdd className="text-lg" /> <span>Create Notice</span>
           </button>
           <button
+            onClick={() => setFilters({ ...filters, status: "Draft" })}
             className="border border-yellow-500 text-yellow-500 cursor-pointer hover:border-yellow-600 hover:text-yellow-600 font-bld py-2 px-4 rounded-lg flex items-center space-x-1"
           >
             <MdEdit className="text-base" /> <span>All Draft Notice</span>
@@ -227,8 +245,8 @@ export default function NoticeBoardPage() {
           onChange={(e) => setFilters({ ...filters, status: e.target.value })}
         >
           <option value="">Status</option>
-          <option value="published">Published</option>
-          <option value="unpublished">Unpublished</option>
+          <option value="Published">Published</option>
+          <option value="Pnpublished">Unpublished</option>
         </select>
 
         {/* Published On Date Picker */}
@@ -262,18 +280,19 @@ export default function NoticeBoardPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded shadow overflow-x-auto">
+      <div className="bg-white rounded-lg shadow border border-gray-300 overflow-x-auto">
         {loadingTable ? (
           <div className="flex flex-col items-center justify-center py-8 text-gray-700 text-lg">
             <FaSpinner className="animate-spin text-4xl mb-3" />
-            <p>Loading notices table...</p>
+            <p>Loading Notice Table, Please Wait...</p>
           </div>
         ) : (
           <table className="w-full text-md text-gray-600">
             <thead className="bg-gray-100">
               <tr>
-                <th className="p-3 text-left">Title</th>
-                <th className="p-3">Notice Type</th>
+                <th className="p-3 text-left"><input type="checkbox" onChange={handleSelectAll} /></th>
+                <th className="p-0 text-left">Title</th>
+                <th className="p-0">Notice Type</th>
                 <th className="p-3">Departments/Individuals</th>
                 <th className="p-3">Published On</th>
                 <th className="p-3">Status</th>
@@ -282,17 +301,18 @@ export default function NoticeBoardPage() {
             </thead>
             <tbody>
               {data.map((n) => (
-                <tr key={n._id} className="border-t hover:bg-gray-50">
-                  <td className="p-3">{n.title}</td>
-                  <td className="p-3 text-center">{n.noticeType}</td>
-                  <td className="p-3 text-center">-</td>
+                <tr key={n._id} className="border-t border-gray-300 hover:bg-gray-50">
+                  <td className="p-3"><input type="checkbox" checked={selectedNotices.includes(n._id)} onChange={(e) => handleSelect(e, n._id)} /></td>
+                  <td className="p-0 max-w-sm text-left">{n.title}</td>
+                  <td className="p-0 text-center">{n.noticeType}</td>
+                  <td className="p-3 text-center">{n.targetDepartmentOrIndividual}</td>
                   <td className="p-3 text-center">
-                    {n.publishedAt ? moment(n.publishedAt).format("DD MMM YYYY") : '-'}
+                    {n.publishingDate ? moment(n.publishingDate).format("DD MMM YYYY") : '-'}
                   </td>
-                  <td className="p-3 text-center">
+                  <td className="p-1 text-center">
                     <span
-                      className={`px-3 py-1 text-xs rounded-full text-white ${
-                        n.status === "published" ? "bg-green-600" : n.status === "draft" ? "bg-yellow-500" : "bg-gray-500"
+                      className={`px-3 py-1 text-xs rounded-lg text-white ${
+                        n.status === "Published" ? "bg-green-600" : n.status === "Draft" ? "bg-yellow-500" : "bg-gray-500"
                       }`}
                     >
                       {n.status}
@@ -319,8 +339,8 @@ export default function NoticeBoardPage() {
                           onClick={() => toggleStatus(n._id, n.status)}
                           className="flex items-center justify-between px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         >
-                          <span>{n.status === "published" ? "Unpublish" : "Publish"}</span>
-                          {n.status === "published" ? <FaToggleOn className="text-green-500" /> : <FaToggleOff className="text-gray-500" />}
+                          <span>{n.status === "Published" ? "Unpublish" : "Publish"}</span>
+                          {n.status === "Published" ? <FaToggleOn className="text-green-500" /> : <FaToggleOff className="text-gray-500" />}
                         </div>
                       </div>
                     )}
@@ -363,3 +383,4 @@ export default function NoticeBoardPage() {
     </>
   );
 }
+
