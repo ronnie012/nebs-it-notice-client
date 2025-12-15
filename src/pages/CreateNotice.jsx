@@ -337,16 +337,18 @@ export default function CreateNotice() {
               type="button"
               onClick={(e) => handleSubmit(e, "Draft")}
               disabled={loadingDraft || loadingPublish}
-              className="border border-blue-400 text-blue-500 font-bold px-6 py-2 rounded-full hover:bg-gray-100 cursor-pointer"
+              className="flex items-center justify-center border border-blue-400 text-blue-500 font-bold px-6 py-2 rounded-full hover:bg-gray-100 cursor-pointer"
             >
-              {loadingDraft ? "Saving Draft..." : "Save as Draft"}
+              {loadingDraft ? <FaSpinner className="animate-spin mr-2" /> : null}
+              {loadingDraft ? "Saving Draft" : "Save as Draft"}
             </button>
             <button
               type="submit"
               disabled={loadingPublish || loadingDraft}
-              className="flex items-center gap-2 bg-orange-500 text-white font-bold px-6 py-2 rounded-full hover:bg-orange-600 cursor-pointer"
+              className="flex items-center justify-center gap-2 bg-orange-500 text-white font-bold px-6 py-2 rounded-full hover:bg-orange-600 cursor-pointer"
             >
-             <FaCheck /> {loadingPublish ? "Publishing..." : "Publish Notice"}
+              {loadingPublish ? <FaSpinner className="animate-spin" /> : <FaCheck />}
+              {loadingPublish ? "Publishing" : "Publish Notice"}
             </button>
           </div>
         </form>

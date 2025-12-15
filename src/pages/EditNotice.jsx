@@ -361,16 +361,18 @@ export default function EditNotice() {
               type="button"
               onClick={(e) => handleSubmit(e, "Draft")}
               disabled={saving}
-              className="border border-blue-400 text-blue-500 font-bold px-6 py-2 rounded-full hover:bg-gray-100 cursor-pointer"
+              className="flex items-center justify-center border border-blue-400 text-blue-500 font-bold px-6 py-2 rounded-full hover:bg-gray-100 cursor-pointer"
             >
-              {saving ? "Saving..." : "Save as Draft"}
+              {saving ? <FaSpinner className="animate-spin mr-2" /> : null}
+              {saving ? "Saving Draft" : "Save as Draft"}
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="flex items-center gap-2 bg-orange-500 text-white font-bold px-6 py-2 rounded-full hover:bg-orange-600 cursor-pointer"
+              className="flex items-center justify-center gap-2 bg-orange-500 text-white font-bold px-6 py-2 rounded-full hover:bg-orange-600 cursor-pointer"
             >
-              <FaCheck /> {saving ? "Updating..." : "Update Notice"}
+              {saving ? <FaSpinner className="animate-spin" /> : <FaCheck />}
+              {saving ? "Updating" : "Update Notice"}
             </button>
           </div>
         </form>

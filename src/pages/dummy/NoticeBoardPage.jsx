@@ -311,8 +311,8 @@ export default function NoticeBoardPage() {
                   </td>
                   <td className="p-1 text-center">
                     <span
-                      className={`px-3 py-1 text-xs rounded-lg text-white ${
-                        n.status === "Published" ? "bg-green-600" : n.status === "Draft" ? "bg-yellow-500" : "bg-gray-500"
+                      className={`px-3 py-1 text-sm rounded-lg ${
+                        n.status === "Published" ? "bg-green-200 text-green-600 font-bold text-" : n.status === "Draft" ? "bg-yellow-200 text-yellow-600 font-bold" : "bg-gray-200 text-gray-500 font-bold"
                       }`}
                     >
                       {n.status}
