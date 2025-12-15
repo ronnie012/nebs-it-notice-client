@@ -334,13 +334,13 @@ export default function NoticeBoardPage() {
 
                     {/* Popover for Publish/Unpublish Toggle */}
                     {popover.show && popover.id === n._id && (
-                      <div ref={popoverRef} className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg z-10">
+                      <div ref={popoverRef} className="absolute right-2 bottom-9 mt-2 w-43 bg-white border rounded shadow-lg z-10">
                         <div
                           onClick={() => toggleStatus(n._id, n.status)}
-                          className="flex items-center justify-between px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                          className="flex items-center justify-between px-4 py-0 hover:bg-gray-100 cursor-pointer"
                         >
                           <span>{n.status === "Published" ? "Unpublish" : "Publish"}</span>
-                          {n.status === "Published" ? <FaToggleOn className="text-green-500" /> : <FaToggleOff className="text-gray-500" />}
+                          {n.status === "Published" ? <FaToggleOn className="text-green-500 text-2xl" /> : <FaToggleOff className="text-gray-500 text-2xl" />}
                         </div>
                       </div>
                     )}
@@ -349,17 +349,17 @@ export default function NoticeBoardPage() {
                     {kebabMenu.show && kebabMenu.id === n._id && (
                       <div
                         ref={kebabMenuRef}
-                        className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg z-30"
+                        className="flex flex-row absolute right-2 bottom-9 w-43 bg-white border rounded shadow-lg z-30"
                       >
                         <div
                           onClick={() => handleEdit(n._id)}
-                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                          className="px-6 py-0 hover:bg-gray-100 cursor-pointer text-green-600"
                         >
                           Edit
                         </div>
                         <div
                           onClick={() => handleDelete(n._id)}
-                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-600"
+                          className="px-6 py-0 hover:bg-gray-100 cursor-pointer text-red-600"
                         >
                           Delete
                         </div>
