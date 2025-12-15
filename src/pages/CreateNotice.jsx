@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaArrowLeft, FaUpload, FaPaperclip, FaTimes, FaCheck, FaCheckCircle } from "react-icons/fa";
+import { FaArrowLeft, FaUpload, FaPaperclip, FaTimes, FaCheck, FaCheckCircle, FaSpinner } from "react-icons/fa";
 import { createNotice } from "../api/noticeApi";
 
 export default function CreateNotice() {
@@ -254,7 +254,7 @@ export default function CreateNotice() {
                 name="publishingDate"
                 value={form.publishingDate}
                 onChange={handleChange}
-                placeholderText="Select publishing date"
+                placeholder="Select publishing date"
                 className="w-full border rounded px-3 py-2 mt-1 text-gray-500"
               />
             </div>

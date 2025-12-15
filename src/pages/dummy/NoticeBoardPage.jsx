@@ -8,7 +8,7 @@ import NoticeDetailModal from "../../components/NoticeDetailModal";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import moment from "moment";
-import { FaEye, FaEdit, FaToggleOn, FaToggleOff, FaEllipsisV, FaSpinner } from "react-icons/fa"; // Added FaSpinner
+import { FaEye, FaEdit, FaToggleOn, FaToggleOff, FaEllipsisV, FaSpinner, FaCheckCircle } from "react-icons/fa"; // Added FaSpinner
 
 // Custom Input for DatePicker
 const CustomDateInput = forwardRef(({ value, onClick, placeholderText, ...props }, ref) => (
@@ -23,6 +23,33 @@ const CustomDateInput = forwardRef(({ value, onClick, placeholderText, ...props 
     {...props}
   />
 ));
+
+// Helper function to get color classes based on department/individual
+const getDepartmentColor = (department) => {
+  if (!department) { // Keep the check for undefined or null department
+    return "bg-gray-200 text-gray-500"; // Default color for undefined/null
+  }
+  switch (department.toLowerCase()) {
+    case "all departments":
+      return "bg-blue200 text-blue-500";
+    case "finance":
+      return "bg-green200 text-green-500";
+    case "sales team":
+      return "bg-red200 text-red-500";
+    case "web team":
+      return "bg-purple200 text-purple-500";
+    case "database team":
+      return "bg-indigo-200 text-indigo-800"; // This one was already 800
+    case "admin":
+      return "bg-yellow200 text-yellow-500";
+    case "individual":
+      return "bg-pink200 text-pink-500";
+    case "hr":
+      return "bg-teal200 text-teal-500";
+    default:
+      return "bg-gray-200 text-gray-500"; // Keep the default color for valid but unmatched departments
+  }
+};
 
 export default function NoticeBoardPage() {
   const [data, setData] = useState([]);
@@ -40,6 +67,13 @@ export default function NoticeBoardPage() {
   const [showModal, setShowModal] = useState(false);
   const [selectedNotice, setSelectedNotice] = useState(null);
   const [modalLoading, setModalLoading] = useState(false);
+
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [noticeToDeleteId, setNoticeToDeleteId] = useState(null);
+  const [noticeToDeleteTitle, setNoticeToDeleteTitle] = useState("");
+
+  const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
+  const [deletedNoticeTitle, setDeletedNoticeTitle] = useState("");
 
   const [loadingTable, setLoadingTable] = useState(true); // New loading state for table
 
@@ -152,19 +186,33 @@ export default function NoticeBoardPage() {
     });
   }
 
-  async function handleDelete(id) {
-    if (!window.confirm("Are you sure you want to delete this notice?")) {
-      setKebabMenu({ show: false, id: null, position: { x: 0, y: 0 } });
-      return;
-    }
-    try {
-      await deleteNotice(id);
-      setData(prevData => prevData.filter(item => item._id !== id));
-      setKebabMenu({ show: false, id: null, position: { x: 0, y: 0 } });
-    } catch (error) {
+  function handleDeleteClick(id, title) { // Added title parameter
+    setKebabMenu({ show: false, id: null, position: { x: 0, y: 0 } }); // Close kebab menu
+    setNoticeToDeleteId(id);
+    setNoticeToDeleteTitle(title); // Store the title
+    setShowDeleteConfirmModal(true);
+  }
 
-      fetchData();
+  async function confirmDelete() {
+    setShowDeleteConfirmModal(false); // Close the confirm modal immediately
+    if (!noticeToDeleteId) return; // Should not happen if modal is opened correctly
+
+    try {
+      await deleteNotice(noticeToDeleteId);
+      setData(prevData => prevData.filter(item => item._id !== noticeToDeleteId));
+      setDeletedNoticeTitle(noticeToDeleteTitle); // Store title for success modal
+      setShowDeleteSuccessModal(true); // Show success modal
+      setNoticeToDeleteId(null); // Clear the ID after deletion
+      setNoticeToDeleteTitle(""); // Clear the title after deletion
+    } catch (error) {
+      console.error("Failed to delete notice:", error);
+      fetchData(); // Re-fetch data to ensure UI is in sync
     }
+  }
+
+  function cancelDelete() {
+    setShowDeleteConfirmModal(false);
+    setNoticeToDeleteId(null);
   }
 
   function handleEdit(id) {
@@ -226,8 +274,14 @@ export default function NoticeBoardPage() {
           onChange={(e) => setFilters({ ...filters, departmentsOrIndividuals: e.target.value })}
         >
           <option value="">Departments or Individuals</option>
-          <option value="departments">Departments</option>
-          <option value="individuals">Individuals</option>
+          <option value="all departments">All Departments</option>
+          <option value="finance">Finance</option>
+          <option value="sales team">Sales Team</option>
+          <option value="web team">Web Team</option>
+          <option value="database team">Database Team</option>
+          <option value="admin">Admin</option>
+          <option value="individual">Individual</option>
+          <option value="hr">HR</option>
         </select>
 
         {/* Employee ID or Name */}
@@ -245,8 +299,9 @@ export default function NoticeBoardPage() {
           onChange={(e) => setFilters({ ...filters, status: e.target.value })}
         >
           <option value="">Status</option>
+          <option value="Draft">Draft</option>
           <option value="Published">Published</option>
-          <option value="Pnpublished">Unpublished</option>
+          <option value="Unpublished">Unpublished</option>
         </select>
 
         {/* Published On Date Picker */}
@@ -287,29 +342,37 @@ export default function NoticeBoardPage() {
             <p>Loading Notice Table, Please Wait...</p>
           </div>
         ) : (
-          <table className="w-full text-md text-gray-600">
+          <table className="w-full text-md text-gray-600 table-fixed">
             <thead className="bg-gray-100">
               <tr>
-                <th className="p-3 text-left"><input type="checkbox" onChange={handleSelectAll} /></th>
-                <th className="p-0 text-left">Title</th>
-                <th className="p-0">Notice Type</th>
-                <th className="p-3">Departments/Individuals</th>
-                <th className="p-3">Published On</th>
-                <th className="p-3">Status</th>
-                <th className="p-3">Action</th>
+                <th className="p-3 text-left w-10"><input type="checkbox" onChange={handleSelectAll} /></th>
+                <th className="p-0 text-left w-86">Title</th>
+                <th className="p-0 w-40">Notice Type</th>
+                <th className="pr-5 w-48">Departments/Individuals</th>
+                <th className="p-3 w-32">Published On</th>
+                <th className="p-3 w-28">Status</th>
+                <th className="p-3 w-">Action</th>
               </tr>
             </thead>
             <tbody>
               {data.map((n) => (
                 <tr key={n._id} className="border-t border-gray-300 hover:bg-gray-50">
-                  <td className="p-3"><input type="checkbox" checked={selectedNotices.includes(n._id)} onChange={(e) => handleSelect(e, n._id)} /></td>
-                  <td className="p-0 max-w-sm text-left">{n.title}</td>
-                  <td className="p-0 text-center">{n.noticeType}</td>
-                  <td className="p-3 text-center">{n.targetDepartmentOrIndividual}</td>
-                  <td className="p-3 text-center">
+                  <td className="p-3 text-left w-8"><input type="checkbox" checked={selectedNotices.includes(n._id)} onChange={(e) => handleSelect(e, n._id)} /></td>
+                  <td className="p-3 w-56 text-left ">{n.title}</td>
+                  <td className="p-3 w-40 text-center truncat">{n.noticeType}</td>
+                  <td className="p-3 w-48 text-center">
+                    {n.targetDepartmentOrIndividual ? (
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getDepartmentColor(n.targetDepartmentOrIndividual)}`}>
+                        {n.targetDepartmentOrIndividual}
+                      </span>
+                    ) : (
+                      <span>-</span>
+                    )}
+                  </td>
+                  <td className="p-3 w-32 text-center">
                     {n.publishingDate ? moment(n.publishingDate).format("DD MMM YYYY") : '-'}
                   </td>
-                  <td className="p-1 text-center">
+                  <td className="p-1 w-28 text-center">
                     <span
                       className={`px-3 py-1 text-sm rounded-lg ${
                         n.status === "Published" ? "bg-green-200 text-green-600 font-bold text-" : n.status === "Draft" ? "bg-yellow-200 text-yellow-600 font-bold" : "bg-gray-200 text-gray-500 font-bold"
@@ -318,7 +381,7 @@ export default function NoticeBoardPage() {
                       {n.status}
                     </span>
                   </td>
-                  <td className="p-3 text-center relative">
+                  <td className="p-3 w-32 text-center relative">
                     <button onClick={() => openModal(n._id)} className="text-gray-600 mr-2">
                       <FaEye />
                     </button>
@@ -358,7 +421,7 @@ export default function NoticeBoardPage() {
                           Edit
                         </div>
                         <div
-                          onClick={() => handleDelete(n._id)}
+                          onClick={() => handleDeleteClick(n._id, n.title)}
                           className="px-6 py-0 hover:bg-gray-100 cursor-pointer text-red-600"
                         >
                           Delete
@@ -380,6 +443,54 @@ export default function NoticeBoardPage() {
 
       {/* Notice Detail Modal */}
       {showModal && <NoticeDetailModal notice={selectedNotice} onClose={closeModal} loading={modalLoading} />}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirmModal && (
+        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-12 w-auto text-center shadow-xl">
+            <h3 className="font-semibold text-4xl text-gray-800 mb-4">Confirm Deletion</h3>
+            <p className="text-gray-600 text-xl mb-6">Are you sure you want to delete the notice &quot;<span className="font-bold">{noticeToDeleteTitle}</span>&quot;? <br /> This action cannot be undone.</p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={cancelDelete}
+                className="border border-gray-400 text-gray-500 font-bold px-6 py-2 rounded-full hover:bg-gray-100 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="bg-red-500 text-white font-bold px-6 py-2 rounded-full hover:bg-red-600 cursor-pointer"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Success Modal */}
+      {showDeleteSuccessModal && (
+        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-14 w-auto text-center">
+            <div className="flex justify-center">
+              <FaCheckCircle className="text-green-500 text-6xl" />
+            </div>
+            <h3 className="font-semibold text-4xl mt-4">Notice Deleted Successfully</h3>
+            <p className="text-gray-500 mt-2">The notice &quot;<span className="font-bold">{deletedNoticeTitle}</span>&quot; has been permanently deleted.</p>
+            <div className="flex justify-center gap-4 mt-6">
+              <button
+                onClick={() => {
+                  setShowDeleteSuccessModal(false);
+                  setDeletedNoticeTitle("");
+                }}
+                className="border border-gray-500 text-gray-500 font-bold px-6 py-2 rounded-full hover:bg-gray-100 cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
