@@ -40,9 +40,9 @@ export default function EditNotice() {
           description: notice.description,
           noticeType: notice.noticeType,
           targetDepartmentOrIndividual: notice.targetDepartmentOrIndividual,
-          employeeId: notice.employeeId,
-          employeeName: notice.employeeName,
-          position: notice.position,
+          employeeId: notice.employeeId || "",
+          employeeName: notice.employeeName || "",
+          position: notice.position || "",
           publishingDate: notice.publishingDate
             ? notice.publishingDate.split("T")[0]
             : "",
@@ -249,13 +249,13 @@ export default function EditNotice() {
                 className="w-full border rounded px-3 py-2 mt-1 text-gray-500"
               >
                 <option value="">Select Notice Type</option>
-                <option value="General">Warning / Disciplinary</option>
-                <option value="Urgent">Performance Improvement</option>
-                <option value="Exam">Appreciation / Recognition</option>
-                <option value="Exam">Attendance / Leave Issue</option>
-                <option value="Exam">Payroll / Compensation</option>
-                <option value="Exam">Contract / Role Update</option>
-                <option value="Exam">Advisory / Personal Reminder</option>
+                <option value="Warning / Disciplinary">Warning / Disciplinary</option>
+                <option value="Performance Improvement">Performance Improvement</option>
+                <option value="Appreciation / Recognition">Appreciation / Recognition</option>
+                <option value="Attendance / Leave Issue">Attendance / Leave Issue</option>
+                <option value="Payroll / Compensation">Payroll / Compensation</option>
+                <option value="Contract / Role Update">Contract / Role Update</option>
+                <option value="Advisory / Personal Reminder">Advisory / Personal Reminder</option>
               </select>
               {errors.noticeType && (
                 <p className="text-red-500 text-sm">{errors.noticeType}</p>
@@ -395,7 +395,7 @@ export default function EditNotice() {
                 onClick={() => navigate("/notice-board")}
                 className="border border-blue-500 text-blue-500 font-bold px-6 py-2 rounded-full hover:bg-gray-100 cursor-pointer"
               >
-                View Notice
+                View Notice Board
               </button>
               <button
                 onClick={() => {

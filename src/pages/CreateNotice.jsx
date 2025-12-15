@@ -18,7 +18,7 @@ export default function CreateNotice() {
   });
 
   const [errors, setErrors] = useState({});
-  const [success, setSuccess] = useState(false);
+  const [successType, setSuccessType] = useState(null);
   const [loadingPublish, setLoadingPublish] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [lastCreatedNotice, setLastCreatedNotice] = useState(null);
@@ -59,7 +59,7 @@ export default function CreateNotice() {
     try {
       await createNotice({ ...form, status });
       setLastCreatedNotice(form);
-      setSuccess(true);
+      setSuccessType(status);
       setForm({
         title: "",
         description: "",
@@ -335,7 +335,7 @@ export default function CreateNotice() {
             </button>
             <button
               type="button"
-              onClick={(e) => handleSubmit(e, "draft")}
+              onClick={(e) => handleSubmit(e, "Draft")}
               disabled={loadingDraft || loadingPublish}
               className="border border-blue-400 text-blue-500 font-bold px-6 py-2 rounded-full hover:bg-gray-100 cursor-pointer"
             >
@@ -353,17 +353,20 @@ export default function CreateNotice() {
       </div>
 
       {/* Success Modal */}
-      {success && lastCreatedNotice && (
+      {successType && lastCreatedNotice && (
         <div className="fixed inset-0 bg-black/20 flex items-center justify-center">
           <div className="bg-white rounded-lg p-14 w-auto text-center">
             <div className="flex justify-center">
               <FaCheckCircle className="text-green-500 text-6xl" />
             </div>
             <h3 className="font-semibold text-4xl mt-4">
-              Notice Published Successfully
+              {successType === "published" ? "Notice Published Successfully" : "Notice Saved as Draft Successfully"}
             </h3>
             <p className="text-gray-500 mt-2">
-              Your notice "{lastCreatedNotice.title} - {lastCreatedNotice.publishingDate}" has been published and is now visible to all selected departments.
+              {successType === "published"
+                ? `Your notice "${lastCreatedNotice.title} - ${lastCreatedNotice.publishingDate}" has been published and is now visible to all selected departments.`
+                : `Your notice "${lastCreatedNotice.title}" has been saved as a Draft.`
+              }
             </p>
             <div className="flex justify-center gap-4 mt-6">
               <button
@@ -373,13 +376,13 @@ export default function CreateNotice() {
                 View Notice
               </button>
               <button
-                onClick={() => setSuccess(false)}
+                onClick={() => setSuccessType(null)}
                 className="border border-orange-500 text-orange-500 font-bold px-6 py-2 rounded-full hover:bg-gray-100 cursor-pointer"
               >
                 + Create Another
               </button>
               <button
-                onClick={() => setSuccess(false)}
+                onClick={() => setSuccessType(null)}
                 className="border border-gray-500 text-gray-500 font-bold px-6 py-2 rounded-full hover:bg-gray-100 cursor-pointer"
               >
                 Close
