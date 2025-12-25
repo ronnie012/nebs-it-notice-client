@@ -4,6 +4,8 @@
 
 This is the frontend client for the NEBS IT Notice Management platform. It provides a user interface for creating, viewing, and managing notices. The application is built as a single-page application using React.
 
+## Live Site Link (URL): https://nebs-it-notice-client.vercel.app/
+
 ## Tech Stack
 
 - **Framework**: [React](https://react.dev/)

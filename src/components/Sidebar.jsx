@@ -82,7 +82,7 @@ export default function Sidebar() {
 
   return (
     <aside className="w-1/6 bg-white border-r min-h-screen px-4 py-6">
-      <h2 className="text-xl font-bold mb-8 text-center text-blue-800">Nebs-IT</h2>
+      <h2 className="text-4xl font-bold mb-8 text-center text-blue-800">Nebs-IT</h2>
 
       <nav className="space-y-2">
         <MenuItem to="/dashboard" icon={MdDashboard}>Dashboard</MenuItem>
