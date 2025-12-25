@@ -14,7 +14,7 @@ npm run dev
 
 ## Environment Variables
 Create `.env` file:
-VITE_API_BASE_URL=https://nebs-it-notice-client.vercel.app/api/
+VITE_API_BASE_URL=https://nebs-it-notice-client.vercel.app/
 
 ## Deployment
 Deploy on Vercel as a standalone frontend.
