@@ -196,9 +196,14 @@ export default function EditNotice() {
                 className="w-full border rounded px-3 py-2 mt-1 text-gray-500"
               >
                 <option value="">Select Employee Designation</option>
-                <option value="E-12345">Admin _ E-12345</option>
-                <option value="E-12346">Web Developer _ E-12346</option>
-                <option value="E-12347">HR _ E-12347</option>
+                <option value="All Department">AlD-1</option>
+                <option value="Finance">Fin-2</option>
+                <option value="Sales Team">SlT-3</option>
+                <option value="Web Team">WbT-4</option>
+                <option value="Database Team">DtT-5</option>
+                <option value="Admin">Adm-6</option>
+                <option value="Individual">Ind-7</option>
+                <option value="Human Resource">HmR-8</option>
               </select>
               {errors.employeeId && (
                 <p className="text-red-500 text-sm">{errors.employeeId}</p>

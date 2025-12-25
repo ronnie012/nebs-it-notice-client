@@ -9,6 +9,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import moment from "moment";
 import { FaEye, FaEdit, FaToggleOn, FaToggleOff, FaEllipsisV, FaSpinner, FaCheckCircle } from "react-icons/fa"; // Added FaSpinner
+import { getDepartmentHexColor } from "../../utils/colors";
 
 // Custom Input for DatePicker
 const CustomDateInput = forwardRef(({ value, onClick, placeholderText, ...props }, ref) => (
@@ -25,30 +26,8 @@ const CustomDateInput = forwardRef(({ value, onClick, placeholderText, ...props 
 ));
 
 // Helper function to get color classes based on department/individual
-const getDepartmentColor = (department) => {
-  if (!department) { // Keep the check for undefined or null department
-    return "bg-gray-200 text-gray-500"; // Default color for undefined/null
-  }
-  switch (department.toLowerCase()) {
-    case "all departments":
-      return "bg-blue200 text-blue-500";
-    case "finance":
-      return "bg-green200 text-green-500";
-    case "sales team":
-      return "bg-red200 text-red-500";
-    case "web team":
-      return "bg-purple200 text-purple-500";
-    case "database team":
-      return "bg-indigo-200 text-indigo-800"; // This one was already 800
-    case "admin":
-      return "bg-yellow200 text-yellow-500";
-    case "individual":
-      return "bg-pink200 text-pink-500";
-    case "hr":
-      return "bg-teal200 text-teal-500";
-    default:
-      return "bg-gray-200 text-gray-500"; // Keep the default color for valid but unmatched departments
-  }
+const getDepartmentColorStyle = (department) => {
+  return { color: getDepartmentHexColor(department) };
 };
 
 export default function NoticeBoardPage() {
@@ -76,6 +55,7 @@ export default function NoticeBoardPage() {
   const [deletedNoticeTitle, setDeletedNoticeTitle] = useState("");
 
   const [loadingTable, setLoadingTable] = useState(true); // New loading state for table
+  const [loadingDelete, setLoadingDelete] = useState(false); // New loading state for delete operation
 
   // New states for dynamic counters
   const [activeNoticesCount, setActiveNoticesCount] = useState(0);
@@ -194,19 +174,24 @@ export default function NoticeBoardPage() {
   }
 
   async function confirmDelete() {
-    setShowDeleteConfirmModal(false); // Close the confirm modal immediately
     if (!noticeToDeleteId) return; // Should not happen if modal is opened correctly
+
+    setLoadingDelete(true); // Set loading true at the start of deletion
 
     try {
       await deleteNotice(noticeToDeleteId);
       setData(prevData => prevData.filter(item => item._id !== noticeToDeleteId));
       setDeletedNoticeTitle(noticeToDeleteTitle); // Store title for success modal
+      setShowDeleteConfirmModal(false); // Close the confirm modal AFTER successful deletion
       setShowDeleteSuccessModal(true); // Show success modal
       setNoticeToDeleteId(null); // Clear the ID after deletion
       setNoticeToDeleteTitle(""); // Clear the title after deletion
     } catch (error) {
       console.error("Failed to delete notice:", error);
       fetchData(); // Re-fetch data to ensure UI is in sync
+      setShowDeleteConfirmModal(false); // Close modal even on error
+    } finally {
+      setLoadingDelete(false); // Set loading false after fetch completes
     }
   }
 
@@ -346,7 +331,7 @@ export default function NoticeBoardPage() {
             <thead className="bg-gray-100">
               <tr>
                 <th className="p-3 text-left w-10"><input type="checkbox" onChange={handleSelectAll} /></th>
-                <th className="p-0 text-left w-86">Title</th>
+                <th className="p-0 text-left w-85">Title</th>
                 <th className="p-0 w-40">Notice Type</th>
                 <th className="pr-5 w-48">Departments/Individuals</th>
                 <th className="p-3 w-32">Published On</th>
@@ -358,16 +343,10 @@ export default function NoticeBoardPage() {
               {data.map((n) => (
                 <tr key={n._id} className="border-t border-gray-300 hover:bg-gray-50">
                   <td className="p-3 text-left w-8"><input type="checkbox" checked={selectedNotices.includes(n._id)} onChange={(e) => handleSelect(e, n._id)} /></td>
-                  <td className="p-3 w-56 text-left ">{n.title}</td>
+                  <td className="p-3 w-85 text-left ">{n.title}</td>
                   <td className="p-3 w-40 text-center truncat">{n.noticeType}</td>
-                  <td className="p-3 w-48 text-center">
-                    {n.targetDepartmentOrIndividual ? (
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getDepartmentColor(n.targetDepartmentOrIndividual)}`}>
-                        {n.targetDepartmentOrIndividual}
-                      </span>
-                    ) : (
-                      <span>-</span>
-                    )}
+                  <td className={`p-3 w-48 text-center text-md`} style={n.targetDepartmentOrIndividual ? getDepartmentColorStyle(n.targetDepartmentOrIndividual) : { color: "#6B7280" }}>
+                    {n.targetDepartmentOrIndividual || '-'}
                   </td>
                   <td className="p-3 w-32 text-center">
                     {n.publishingDate ? moment(n.publishingDate).format("DD MMM YYYY") : '-'}
@@ -382,25 +361,25 @@ export default function NoticeBoardPage() {
                     </span>
                   </td>
                   <td className="p-3 w-32 text-center relative">
-                    <button onClick={() => openModal(n._id)} className="text-gray-600 mr-2">
+                    <button onClick={() => openModal(n._id)} className="text-blue-500 hover:text-blue-400 mr-3 text-xl cursor-pointer">
                       <FaEye />
                     </button>
                     <button
                       onClick={() => setPopover({ show: !popover.show, id: n._id })}
-                      className="text-blue-600"
+                      className="text-green-500 hover:text-green-400 text-xl cursor-pointer"
                     >
                       <FaEdit />
                     </button>
-                    <button onClick={(e) => openKebabMenu(e, n._id)} className="text-gray-600 ml-2">
+                    <button onClick={(e) => openKebabMenu(e, n._id)} className="text-gray-500 ml-2 hover:text-gray-400 text-lg cursor-pointer">
                       <FaEllipsisV />
                     </button>
 
                     {/* Popover for Publish/Unpublish Toggle */}
                     {popover.show && popover.id === n._id && (
-                      <div ref={popoverRef} className="absolute right-2 bottom-9 mt-2 w-43 bg-white border rounded shadow-lg z-10">
+                      <div ref={popoverRef} className="absolute right-5 bottom-10 mt-2 w-43 bg-white border rounded shadow-lg z-10">
                         <div
                           onClick={() => toggleStatus(n._id, n.status)}
-                          className="flex items-center justify-between px-4 py-0 hover:bg-gray-100 cursor-pointer"
+                          className="flex items-center justify-between px-4 py-1 hover:bg-gray-100 cursor-pointer"
                         >
                           <span>{n.status === "Published" ? "Unpublish" : "Publish"}</span>
                           {n.status === "Published" ? <FaToggleOn className="text-green-500 text-2xl" /> : <FaToggleOff className="text-gray-500 text-2xl" />}
@@ -412,17 +391,17 @@ export default function NoticeBoardPage() {
                     {kebabMenu.show && kebabMenu.id === n._id && (
                       <div
                         ref={kebabMenuRef}
-                        className="flex flex-row absolute right-2 bottom-9 w-43 bg-white border rounded shadow-lg z-30"
+                        className="flex flex-row absolute right-5 bottom-10 w-43 bg-white border rounded shadow-lg z-30"
                       >
                         <div
                           onClick={() => handleEdit(n._id)}
-                          className="px-6 py-0 hover:bg-gray-100 cursor-pointer text-green-600"
+                          className="px-6 py-1 hover:bg-gray-100 cursor-pointer text-green-600"
                         >
                           Edit
                         </div>
                         <div
                           onClick={() => handleDeleteClick(n._id, n.title)}
-                          className="px-6 py-0 hover:bg-gray-100 cursor-pointer text-red-600"
+                          className="px-6 py-1 hover:bg-gray-100 cursor-pointer text-red-600"
                         >
                           Delete
                         </div>
@@ -459,9 +438,11 @@ export default function NoticeBoardPage() {
               </button>
               <button
                 onClick={confirmDelete}
-                className="bg-red-500 text-white font-bold px-6 py-2 rounded-full hover:bg-red-600 cursor-pointer"
+                disabled={loadingDelete} // Disable button when loading
+                className="bg-red-500 text-white font-bold px-6 py-2 rounded-full hover:bg-red-600 cursor-pointer flex items-center justify-center"
               >
-                Delete
+                {loadingDelete ? <FaSpinner className="animate-spin mr-2" /> : null}
+                {loadingDelete ? "Deleting ..." : "Delete"}
               </button>
             </div>
           </div>

@@ -6,7 +6,7 @@ export default function Pagination({ page, pages, setPage }) {
       <button
         onClick={() => setPage(page - 1)}
         disabled={page === 1}
-        className="disabled:opacity-50 text-xl"
+        className="disabled:opacity-50 text-xl cursor-pointer"
       >
         <FaArrowLeft />
       </button>
@@ -14,8 +14,8 @@ export default function Pagination({ page, pages, setPage }) {
         <button
           key={i}
           onClick={() => setPage(i + 1)}
-          className={`px-3 py-1 border rounded ${
-            page === i + 1 ? "bg-blue-600 text-white" : ""
+          className={`px-3 py-1 border rounded-lg ${
+            page === i + 1 ? "bg-blue-200 text-blue-600 font-bold cursor-pointer" : "cursor-pointer"
           }`}
         >
           {i + 1}
@@ -24,7 +24,7 @@ export default function Pagination({ page, pages, setPage }) {
       <button
         onClick={() => setPage(page + 1)}
         disabled={page === pages}
-        className="disabled:opacity-50 text-xl"
+        className="disabled:opacity-50 text-xl cursor-pointer"
       >
         <FaArrowRight />
       </button>

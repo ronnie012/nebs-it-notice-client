@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaUpload, FaPaperclip, FaTimes, FaCheck, FaCheckCircle, FaSpinner } from "react-icons/fa";
 import { createNotice } from "../api/noticeApi";
+import { getDepartmentHexColor } from "../utils/colors";
 
 export default function CreateNotice() {
   const navigate = useNavigate();
@@ -113,36 +114,17 @@ export default function CreateNotice() {
               name="targetDepartmentOrIndividual"
               value={form.targetDepartmentOrIndividual}
               onChange={handleChange}
-              className="w-full border rounded px-3 py-2 mt-1 text-gray-500" // Removed bg-gray-100 from here
+              className="w-full border rounded px-3 py-2 mt-1 text-gray-500"
             >
               <option value="">Select One Option</option>
-              <option value="All Departments" style={{ color: "#FF5733" }}>
-                All Departments
-              </option>
-              <option value="Individual" style={{ color: "#008000" }}>
-                Individual
-              </option>{" "}
-              {/* Darker green */}
-              <option value="Finance" style={{ color: "#3357FF" }}>
-                Finance
-              </option>
-              <option value="Sales Team" style={{ color: "#FF33A1" }}>
-                Sales Team
-              </option>
-              <option value="Web Team" style={{ color: "#B8860B" }}>
-                Web Team
-              </option>{" "}
-              {/* Darker goldenrod */}
-              <option value="Database Team" style={{ color: "#A133FF" }}>
-                Database Team
-              </option>
-              <option value="Admin" style={{ color: "#008B8B" }}>
-                Admin
-              </option>{" "}
-              {/* Darker cyan */}
-              <option value="HR" style={{ color: "#FF9633" }}>
-                HR
-              </option>
+              <option value="All Departments">All Departments</option>
+              <option value="Individual">Individual</option>
+              <option value="Finance">Finance</option>
+              <option value="Sales Team">Sales Team</option>
+              <option value="Web Team">Web Team</option>
+              <option value="Database Team">Database Team</option>
+              <option value="Admin">Admin</option>
+              <option value="HR">HR</option>
             </select>
             {errors.targetDepartmentOrIndividual && (
               <p className="text-red-500 text-sm">
@@ -180,9 +162,14 @@ export default function CreateNotice() {
                 className="w-full border rounded px-3 py-2 mt-1 text-gray-500"
               >
                 <option value="">Select Employee Designation</option>
-                <option value="E-12345">Admin _ E-12345</option>
-                <option value="E-12346">Web Developer _ E-12346</option>
-                <option value="E-12347">HR _ E-12347</option>
+                <option value="All Department">AlD-1</option>
+                <option value="Finance">Fin-2</option>
+                <option value="Sales Team">SlT-3</option>
+                <option value="Web Team">WbT-4</option>
+                <option value="Database Team">DtT-5</option>
+                <option value="Admin">Adm-6</option>
+                <option value="Individual">Ind-7</option>
+                <option value="Human Resource">HmR-8</option>
               </select>
               {errors.employeeId && (
                 <p className="text-red-500 text-sm">{errors.employeeId}</p>

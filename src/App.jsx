@@ -29,7 +29,7 @@ export default function App() {
     <BrowserRouter>
       <DashboardLayout>
         <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" />} />
+          <Route path="/" element={<Navigate to="/notice-board" />} />
           <Route path="/dashboard" element={<DashboardPage />} />
 
           {/* Employee Tab Routes */}
